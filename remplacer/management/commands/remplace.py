@@ -1,5 +1,5 @@
 from optparse import make_option
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from remplacer import settings
 
 
@@ -20,10 +20,10 @@ class Command(BaseCommand):
         verbosity = int(options['verbosity'])
 
         if not options['noinput']:
-            self.stdout.write('This will replace all instances of String A with String B...\n');
-            self.stdout.write('  A: %s\n' % findstr);
-            self.stdout.write('  B: %s\n' % replacestr);
-            confirmation = raw_input('Are you sure? [Y, n]: ')
+            self.stdout.write('This will replace all instances of String A with String B...\n')
+            self.stdout.write('  A: %s\n' % findstr)
+            self.stdout.write('  B: %s\n' % replacestr)
+            confirmation = input('Are you sure? [Y, n]: ')
             if confirmation not in ['', 'y', 'Y']:
                 exit()
 
@@ -31,16 +31,16 @@ class Command(BaseCommand):
         for model in models:
             if model._meta.app_label not in settings.REMPLACER_IGNORE_APPS:
                 if verbosity >= 2:
-                   self.stdout.write('Checking %s\n' % model)
+                    self.stdout.write('Checking %s\n' % model)
                 objects = model.objects.all()
                 for object in objects:
                     for field in object._meta.fields:
                         field_value = getattr(object, field.name, None)
-                        if isinstance(field_value, basestring):
+                        if isinstance(field_value, str):
                             try:
                                 if field_value.find(findstr) > -1:
                                     if verbosity >= 2:
-                                        print 'Found', field.name, object.pk, getattr(object, field.name, '')
+                                        print('Found', field.name, object.pk, getattr(object, field.name, ''))
                                     if not options['dryrun']:
                                         setattr(object, field.name, field_value.replace(findstr, replacestr))
                                         object.save()
